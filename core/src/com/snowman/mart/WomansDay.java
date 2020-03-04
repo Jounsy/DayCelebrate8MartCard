@@ -12,13 +12,14 @@ import org.w3c.dom.Text;
 public class WomansDay extends ApplicationAdapter {
 	SpriteBatch batch;
 	private Flowers[] flowers;
-	private static final int FLOWERS_COUNT = 100;
+	private static final int FLOWERS_COUNT = 400;
 	Texture blueFlowersTexture;
 	Texture redFlowersTexture;
 	Texture yellowFlowersTexture;
 	Texture dayNumberTexture;
 	private Vector2 dayNumberCenter; //место появления (в create инициализируем)
 	private float globalTime;
+	private Vector2 tmp;
 
 	private class	Flowers {
 		private Vector2 position;
@@ -94,6 +95,7 @@ public class WomansDay extends ApplicationAdapter {
 		yellowFlowersTexture = new Texture("yellowFlower.png");
 		dayNumberTexture = new Texture("green8.png");
 		dayNumberCenter = new Vector2(0,0);
+		tmp = new Vector2(0,0);
 		flowers = new Flowers[FLOWERS_COUNT];
 		for (int i = 0; i < flowers.length; i++){
 			flowers[i] = new Flowers();
@@ -107,9 +109,10 @@ public class WomansDay extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-		//8 рисуем здесь
+		//8ку рисуем здесь
+
 		dayNumberCenter.set(640.0f,360.0f + 10.0f * (float)Math.sin(globalTime * 2.0f));
-		batch.draw(dayNumberTexture,dayNumberCenter.x - 370,dayNumberCenter.y - 400);
+		batch.draw(dayNumberTexture,dayNumberCenter.x - 300,dayNumberCenter.y - 400,600.0f,700.0f);
 
 		for (int i = 0; i < flowers.length; i++){
 			flowers[i].render();
@@ -122,6 +125,14 @@ public class WomansDay extends ApplicationAdapter {
 		globalTime +=deltaTime;
 		for (int i = 0; i < flowers.length; i++){
 			flowers[i].update(deltaTime);
+			//окружность вокруг которой цветы будут обтекать 8ку
+			float rad = 400.f;
+			if (flowers[i].position.dst(dayNumberCenter)<rad){
+			tmp.set(dayNumberCenter).sub(flowers[i].position).nor().scl(-rad).add(dayNumberCenter);
+			flowers[i].position.set(tmp);
+			//отталкиваем влево и вправо цветы меняя скорость
+			flowers[i].speed.x += Math.signum(flowers[i].position.x-dayNumberCenter.x)*rad*deltaTime;
+			}
 		}
 
 	}
